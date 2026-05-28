@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApotekSmart.Models
 {
     public class ObatBebas : BaseObat
     {
-        // Inheritance + Polymorphism
-        // Override CekKelayakan() — layak jika exp masih > 30 hari dari sekarang
         public override bool CekKelayakan()
         {
             return TanggalExp > DateTime.Now.AddDays(30);

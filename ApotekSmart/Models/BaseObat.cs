@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApotekSmart.Models
 {
     public abstract class BaseObat
     {
-        // Encapsulation — field private, akses lewat property
         private int _stok;
         private decimal _hargaJual;
 
@@ -23,7 +18,6 @@ namespace ApotekSmart.Models
         public int StokMinimum { get; set; }
         public bool IsActive { get; set; }
 
-        // Stok tidak boleh negatif
         public int Stok
         {
             get { return _stok; }
@@ -35,7 +29,6 @@ namespace ApotekSmart.Models
             }
         }
 
-        // Harga jual tidak boleh negatif
         public decimal HargaJual
         {
             get { return _hargaJual; }
@@ -47,7 +40,6 @@ namespace ApotekSmart.Models
             }
         }
 
-        // Abstract — wajib diimplementasi oleh subclass
         public abstract bool CekKelayakan();
 
         public override string ToString()

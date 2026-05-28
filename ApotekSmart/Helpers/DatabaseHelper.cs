@@ -11,10 +11,9 @@ namespace ApotekSmart.Helpers
 
         private DatabaseHelper()
         {
-            _connectionString = "Host=localhost;Port=5432;Database=apotek_smart;Username=postgres;Password=190727";
+            _connectionString = "Host=localhost;Port=5432;Database=apotek_smart;Username=postgres;Password=190727"; //ganti password sesuai dengan database Anda
         }
 
-        // Singleton — hanya ada 1 instance DatabaseHelper
         public static DatabaseHelper Instance
         {
             get
@@ -25,13 +24,11 @@ namespace ApotekSmart.Helpers
             }
         }
 
-        // Buka koneksi
         public NpgsqlConnection GetConnection()
         {
             return new NpgsqlConnection(_connectionString);
         }
 
-        // Untuk SELECT — return DataTable
         public DataTable ExecuteQuery(string sql, NpgsqlParameter[] parameters = null)
         {
             DataTable dt = new DataTable();
@@ -49,7 +46,6 @@ namespace ApotekSmart.Helpers
             return dt;
         }
 
-        // Untuk INSERT, UPDATE, DELETE — return jumlah baris terpengaruh
         public int ExecuteNonQuery(string sql, NpgsqlParameter[] parameters = null)
         {
             using (var conn = GetConnection())
@@ -64,7 +60,6 @@ namespace ApotekSmart.Helpers
             }
         }
 
-        // Untuk memanggil Stored Procedure
         public void ExecuteProcedure(string procedureName, NpgsqlParameter[] parameters = null)
         {
             using (var conn = GetConnection())

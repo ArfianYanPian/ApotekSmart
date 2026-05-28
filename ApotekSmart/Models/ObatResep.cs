@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApotekSmart.Models
 {
     public class ObatResep : BaseObat
     {
-        // Tambahan property khusus obat resep
         public string GolonganObat { get; set; }
 
-        // Override CekKelayakan() — cek exp + golongan tidak boleh kosong
         public override bool CekKelayakan()
         {
             return TanggalExp > DateTime.Now.AddDays(30)
