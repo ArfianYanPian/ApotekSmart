@@ -59,15 +59,5 @@ namespace ApotekSmart.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap Bayle_red_pc {
-            get {
-                object obj = ResourceManager.GetObject("Bayle red pc", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }
