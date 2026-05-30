@@ -2,7 +2,7 @@
 
 namespace ApotekSmart.Interfaces
 {
-    public interface ICRUDservice<T>
+    public interface ICRUDService<T>
     {
         bool Create(T entity);
         List<T> ReadAll();
