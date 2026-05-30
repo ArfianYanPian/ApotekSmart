@@ -9,13 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Controllers\**" />
     <Compile Remove="Interfaces\**" />
     <Compile Remove="Views\**" />
-    <EmbeddedResource Remove="Controllers\**" />
     <EmbeddedResource Remove="Interfaces\**" />
     <EmbeddedResource Remove="Views\**" />
-    <None Remove="Controllers\**" />
     <None Remove="Interfaces\**" />
     <None Remove="Views\**" />
   </ItemGroup>
