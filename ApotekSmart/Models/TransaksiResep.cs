@@ -42,9 +42,9 @@ namespace ApotekSmart.Models
             }
         }
 
-        public override void TampilStruk()
+        public override void CetakStruk()
         {
-            base.TampilStruk();
+            base.CetakStruk();
             Console.WriteLine($"Nomor Resep    : {NomorResep}");
             Console.WriteLine($"Nama Pasien    : {NamaPasien}");
             Console.WriteLine($"Nama Dokter    : {NamaDokter}");
