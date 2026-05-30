@@ -8,7 +8,7 @@ namespace ApotekSmart.Models
         public int IdKasir { get; set; }
         public string JenisTransaksi { get; set; } // 'biasa' atau 'resep'
         public string Status { get; set; } // 'selesai', 'menunggu', 'ditolak'
-        public decimal Total { get; set; }
+        public decimal Total { get; private set; }
         public DateTime CreatedAt { get; set; }
 
         // Navigational Property (Relasi)
@@ -16,7 +16,7 @@ namespace ApotekSmart.Models
 
         public abstract void ProsesTransaksi();
 
-        public virtual void TampilStruk()
+        public virtual void CetakStruk()
         {
             Console.WriteLine("=====================================");
             Console.WriteLine($"ID Transaksi : {IdTransaksi}");
