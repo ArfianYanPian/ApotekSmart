@@ -9,27 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Remove="Form1.resx" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Form1.resx" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Interfaces\" />
-    <Folder Include="Views\" />
+    <Compile Remove="Interfaces\**" />
+    <Compile Remove="Views\**" />
+    <EmbeddedResource Remove="Interfaces\**" />
+    <EmbeddedResource Remove="Views\**" />
+    <None Remove="Interfaces\**" />
+    <None Remove="Views\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="10.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
