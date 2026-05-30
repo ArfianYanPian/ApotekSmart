@@ -25,6 +25,10 @@ namespace ApotekSmart.Models
         {
             return _Password == password;
         }
+        public string GetPassword()
+        {
+            return _Password;
+        }
         public virtual bool Login(string username, string password)
         {
             return this.Username == username && CekPassword(password) && this.IsActive;
