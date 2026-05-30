@@ -33,9 +33,9 @@ namespace ApotekSmart.Controllers
             foreach (DataRow row in dt.Rows)
             {
                 if (row["role"].ToString().ToLower() == "kasir")
-                    users.Add(new Kasir { IdUser = Convert.ToInt32(row["id_user"]), Nama = row["nama"].ToString(), Role = "Kasir" });
+                    users.Add(new Kasir { IdUser = Convert.ToInt32(row["id_user"]), Nama = row["nama"].ToString(), Role = "kasir" });
                 else
-                    users.Add(new Apoteker { IdUser = Convert.ToInt32(row["id_user"]), Nama = row["nama"].ToString(), Role = "Apoteker" });
+                    users.Add(new Apoteker { IdUser = Convert.ToInt32(row["id_user"]), Nama = row["nama"].ToString(), Role = "apoteker" });
             }
             return users;
         }
