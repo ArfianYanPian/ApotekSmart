@@ -16,7 +16,7 @@ namespace ApotekSmart.Controllers
                 new NpgsqlParameter("@pass", password)
             };
 
-            DataTable dt = DatabaseHelper.Instance.ExecuteQuery(sql, parameters); //
+            DataTable dt = DatabaseHelper.Instance.ExecuteQuery(sql, parameters);
 
             if (dt.Rows.Count > 0)
             {
@@ -27,7 +27,7 @@ namespace ApotekSmart.Controllers
                 {
                     return new Apoteker
                     {
-                        IdUser = Convert.ToInt32(row["id"]),
+                        IdUser = Convert.ToInt32(row["id_user"]),
                         Nama = row["nama"].ToString(),
                         Username = row["username"].ToString(),
                         Role = role,
@@ -39,7 +39,7 @@ namespace ApotekSmart.Controllers
                 {
                     return new Kasir
                     {
-                        IdUser = Convert.ToInt32(row["id"]),
+                        IdUser = Convert.ToInt32(row["id_user"]),
                         Nama = row["nama"].ToString(),
                         Username = row["username"].ToString(),
                         Role = role,

@@ -13,15 +13,23 @@ namespace ApotekSmart.Controllers
             return DatabaseHelper.Instance.ExecuteQuery("SELECT * FROM resep WHERE status_validasi = 'menunggu'");
         }
 
-        public void ValidasiResep(int idResep, string status, int apotekerId, string catatan)
+        public bool ValidasiResep(int idResep, string status, int apotekerId, string catatan)
         {
-            NpgsqlParameter[] parameters = {
-                new NpgsqlParameter("@p_id_resep", idResep),
-                new NpgsqlParameter("@p_status", status),
-                new NpgsqlParameter("@p_id_apoteker", apotekerId),
-                new NpgsqlParameter("@p_catatan", catatan)
+            try
+            {
+                NpgsqlParameter[] parameters = {
+                new NpgsqlParameter("p_resep_id", idResep),
+                new NpgsqlParameter("p_apoteker_id", apotekerId),
+                new NpgsqlParameter("p_status", status),
+                new NpgsqlParameter("p_catatan", catatan)
             };
-            DatabaseHelper.Instance.ExecuteProcedure("sp_validasi_resep", parameters); //
+                DatabaseHelper.Instance.ExecuteProcedure("sp_validasi_resep", parameters);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Gagal validasi resep: " + ex.Message);
+            }
         }
     }
 }
