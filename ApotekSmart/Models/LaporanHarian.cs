@@ -34,8 +34,8 @@ namespace ApotekSmart.Models
                 new NpgsqlParameter("@sampai", tanggalAkhir)
             };
 
-            // FIX: db bukan db, params bukan params
-            return db.ExecuteQuery(sql, params);
+            // FIX: _db bukan db, params_ bukan params
+            return _db.ExecuteQuery(sql, params_);
         }
 
         public void CetakLaporan()

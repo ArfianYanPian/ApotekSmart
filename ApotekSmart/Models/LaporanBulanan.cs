@@ -1,100 +1,48 @@
 ﻿using System;
 using System.Data;
 using Npgsql;
-using ApotekSmart.Models;
 using ApotekSmart.Helpers;
+using ApotekSmart.Interfaces;
 
-namespace ApotekSmart.Controllers
+namespace ApotekSmart.Models
 {
-    public class TransaksiController
+    public class LaporanBulanan : ILaporan
     {
         private DatabaseHelper _db = DatabaseHelper.Instance;
 
-        public bool ProsesBayar(int idKasir, string jenisTransaksi,
-                                 string itemsJson, decimal jumlahBayar)
+        public DataTable GenerateLaporan(DateTime tanggalMulai, DateTime tanggalAkhir)
         {
-            try
-            {
-                var params_ = new NpgsqlParameter[]
-                {
-                    new NpgsqlParameter("p_kasir_id",    idKasir),
-                    new NpgsqlParameter("p_jenis",       jenisTransaksi),
-                    new NpgsqlParameter("p_items",       itemsJson),
-                    new NpgsqlParameter("p_jumlah_bayar", jumlahBayar)
-                };
-                // FIX: db bukan db, params bukan params
-                db.ExecuteProcedure("sp_proses_transaksi", params);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Gagal proses transaksi: " + ex.Message);
-            }
-        }
+            // Berbeda dari LaporanHarian: group by bulan saja, tanpa hari
+            string sql = @"SELECT 
+                EXTRACT(YEAR  FROM t.created_at) AS tahun,
+                EXTRACT(MONTH FROM t.created_at) AS bulan,
+                COUNT(t.id_transaksi)            AS jumlah_transaksi,
+                SUM(t.total)                     AS total_penjualan,
+                COUNT(CASE WHEN t.jenis_transaksi = 'resep' 
+                           THEN 1 END)           AS transaksi_resep,
+                COUNT(CASE WHEN t.jenis_transaksi = 'biasa' 
+                           THEN 1 END)           AS transaksi_biasa
+            FROM transaksi t
+            WHERE t.status = 'selesai'
+              AND t.created_at BETWEEN @dari AND @sampai
+            GROUP BY ROLLUP(
+                EXTRACT(YEAR  FROM t.created_at),
+                EXTRACT(MONTH FROM t.created_at)
+            )
+            ORDER BY tahun, bulan";
 
-        public DataTable GetRiwayatTransaksi()
-        {
-            return _db.ExecuteQuery(
-                "SELECT * FROM v_transaksi_detail ORDER BY tanggal DESC");
-        }
-
-        public DataTable GetTransaksiById(int idTransaksi)
-        {
-            string sql = "SELECT * FROM v_transaksi_detail WHERE id_transaksi = @id";
             var params_ = new NpgsqlParameter[]
             {
-                new NpgsqlParameter("@id", idTransaksi)
+                new NpgsqlParameter("@dari",   tanggalMulai),
+                new NpgsqlParameter("@sampai", tanggalAkhir)
             };
-            // FIX: db bukan db, params bukan params
-            return db.ExecuteQuery(sql, params);
+
+            return _db.ExecuteQuery(sql, params_);
         }
 
-        public bool BuatTransaksiResep(int idKasir, string nomorResep,
-                                        string namaPasien, string namaDokter)
+        public void CetakLaporan()
         {
-            try
-            {
-                string sqlTransaksi = @"INSERT INTO transaksi 
-                    (id_kasir, jenis_transaksi, status, total)
-                    VALUES (@idKasir, 'resep', 'menunggu', 0)
-                    RETURNING id_transaksi";
-                var paramsT = new NpgsqlParameter[]
-                {
-                    new NpgsqlParameter("@idKasir", idKasir)
-                };
-                DataTable dt = _db.ExecuteQuery(sqlTransaksi, paramsT);
-                int idTransaksi = Convert.ToInt32(dt.Rows[0]["id_transaksi"]);
-
-                string sqlResep = @"INSERT INTO resep 
-                    (id_transaksi, nomor_resep, nama_pasien, nama_dokter, status_validasi)
-                    VALUES (@idTr, @nomor, @pasien, @dokter, 'menunggu')";
-                var paramsR = new NpgsqlParameter[]
-                {
-                    new NpgsqlParameter("@idTr",   idTransaksi),
-                    new NpgsqlParameter("@nomor",  nomorResep),
-                    new NpgsqlParameter("@pasien", namaPasien),
-                    new NpgsqlParameter("@dokter", namaDokter)
-                };
-                return _db.ExecuteNonQuery(sqlResep, paramsR) > 0;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Gagal buat transaksi resep: " + ex.Message);
-            }
-        }
-
-        public string CekStatusResep(string nomorResep)
-        {
-            string sql = "SELECT status_validasi FROM resep WHERE nomor_resep = @nomor";
-            var params_ = new NpgsqlParameter[]
-            {
-                new NpgsqlParameter("@nomor", nomorResep)
-            };
-            // FIX: db bukan db, params bukan params
-            DataTable dt = db.ExecuteQuery(sql, params);
-            if (dt.Rows.Count > 0)
-                return dt.Rows[0]["status_validasi"].ToString();
-            return null;
+            Console.WriteLine("Laporan Bulanan ApotekSmart");
         }
     }
 }
