@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ApotekSmart.Models
 {
@@ -6,13 +7,25 @@ namespace ApotekSmart.Models
     {
         public int IdTransaksi { get; set; }
         public int IdKasir { get; set; }
-        public string JenisTransaksi { get; set; } // 'biasa' atau 'resep'
-        public string Status { get; set; } // 'selesai', 'menunggu', 'ditolak'
-        public decimal Total { get; private set; }
+        public string JenisTransaksi { get; set; }
+        public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        // Navigational Property (Relasi)
+        // FIX: protected set agar subclass/controller bisa isi nilainya
+        public decimal Total { get; protected set; }
+
+        public List<ItemTransaksi> Items { get; set; } = new List<ItemTransaksi>();
+
+        // Navigational Property
         public Kasir Kasir { get; set; }
+
+        // Method untuk subclass/controller set total dari Items
+        public void HitungTotal()
+        {
+            Total = 0;
+            foreach (var item in Items)
+                Total += item.Subtotal;
+        }
 
         public abstract void ProsesTransaksi();
 
@@ -22,7 +35,7 @@ namespace ApotekSmart.Models
             Console.WriteLine($"ID Transaksi : {IdTransaksi}");
             Console.WriteLine($"Jenis        : {JenisTransaksi}");
             Console.WriteLine($"Status       : {Status}");
-            Console.WriteLine($"Total        : Rp {Total}");
+            Console.WriteLine($"Total        : Rp {Total:N0}");
             Console.WriteLine("=====================================");
         }
     }
