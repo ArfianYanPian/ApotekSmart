@@ -12,15 +12,18 @@ namespace ApotekSmart.Models
 
         public DataTable GenerateLaporan(DateTime tanggalMulai, DateTime tanggalAkhir)
         {
-            // Berbeda dari LaporanHarian: group by bulan saja, tanpa hari
-            string sql = @"SELECT 
+            if (tanggalMulai > tanggalAkhir)
+                throw new ArgumentException(
+                    "Tanggal mulai tidak boleh lebih besar dari tanggal akhir.");
+
+            string sql = @"SELECT
                 EXTRACT(YEAR  FROM t.created_at) AS tahun,
                 EXTRACT(MONTH FROM t.created_at) AS bulan,
                 COUNT(t.id_transaksi)            AS jumlah_transaksi,
                 SUM(t.total)                     AS total_penjualan,
-                COUNT(CASE WHEN t.jenis_transaksi = 'resep' 
+                COUNT(CASE WHEN t.jenis_transaksi = 'resep'
                            THEN 1 END)           AS transaksi_resep,
-                COUNT(CASE WHEN t.jenis_transaksi = 'biasa' 
+                COUNT(CASE WHEN t.jenis_transaksi = 'biasa'
                            THEN 1 END)           AS transaksi_biasa
             FROM transaksi t
             WHERE t.status = 'selesai'
@@ -36,7 +39,6 @@ namespace ApotekSmart.Models
                 new NpgsqlParameter("@dari",   tanggalMulai),
                 new NpgsqlParameter("@sampai", tanggalAkhir)
             };
-
             return _db.ExecuteQuery(sql, params_);
         }
 

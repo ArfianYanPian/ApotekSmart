@@ -5,21 +5,73 @@ namespace ApotekSmart.Models
 {
     public abstract class BaseTransaksi
     {
-        public int IdTransaksi { get; set; }
-        public int IdKasir { get; set; }
-        public string JenisTransaksi { get; set; }
-        public string Status { get; set; }
-        public DateTime CreatedAt { get; set; }
+        private int _idTransaksi;
+        private int _idKasir;
+        private string _jenisTransaksi;
+        private string _status;
+        private DateTime _createdAt;
 
-        // FIX: protected set agar subclass/controller bisa isi nilainya
+        public int IdTransaksi
+        {
+            get { return _idTransaksi; }
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentException("IdTransaksi harus lebih dari 0.");
+                _idTransaksi = value;
+            }
+        }
+
+        public int IdKasir
+        {
+            get { return _idKasir; }
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentException("IdKasir harus lebih dari 0.");
+                _idKasir = value;
+            }
+        }
+
+        public string JenisTransaksi
+        {
+            get { return _jenisTransaksi; }
+            set
+            {
+                if (value != "biasa" && value != "resep")
+                    throw new ArgumentException("JenisTransaksi harus 'biasa' atau 'resep'.");
+                _jenisTransaksi = value;
+            }
+        }
+
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                if (value != "selesai" && value != "menunggu" && value != "ditolak")
+                    throw new ArgumentException(
+                        "Status harus 'selesai', 'menunggu', atau 'ditolak'.");
+                _status = value;
+            }
+        }
+
+        public DateTime CreatedAt
+        {
+            get { return _createdAt; }
+            set
+            {
+                if (value > DateTime.Now)
+                    throw new ArgumentException("CreatedAt tidak boleh di masa depan.");
+                _createdAt = value;
+            }
+        }
+
         public decimal Total { get; protected set; }
 
         public List<ItemTransaksi> Items { get; set; } = new List<ItemTransaksi>();
-
-        // Navigational Property
         public Kasir Kasir { get; set; }
 
-        // Method untuk subclass/controller set total dari Items
         public void HitungTotal()
         {
             Total = 0;

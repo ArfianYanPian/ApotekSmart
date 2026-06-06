@@ -8,47 +8,85 @@ namespace ApotekSmart.Controllers
 {
     public class AuthController
     {
+        // TODO (sebelum production): ganti ke password hashing (BCrypt.Net-Next via NuGet)
+        // Install: Install-Package BCrypt.Net-Next
+        // Login: BCrypt.Net.BCrypt.Verify(inputPassword, storedHash)
+        // Register/Update: BCrypt.Net.BCrypt.HashPassword(plainPassword)
+
         public BaseUser Login(string username, string password)
         {
-            string sql = "SELECT * FROM users WHERE username = @user AND password = @pass AND is_active = true";
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Username dan password tidak boleh kosong.");
+
+            string sql = @"SELECT * FROM users 
+                          WHERE username = @user 
+                            AND password = @pass 
+                            AND is_active = true";
             NpgsqlParameter[] parameters = {
                 new NpgsqlParameter("@user", username),
                 new NpgsqlParameter("@pass", password)
             };
 
             DataTable dt = DatabaseHelper.Instance.ExecuteQuery(sql, parameters);
+            if (dt.Rows.Count == 0) return null;
 
-            if (dt.Rows.Count > 0)
+            try
             {
-                DataRow row = dt.Rows[0];
-                string role = row["role"].ToString().ToLower();
-
-                if (role == "apoteker")
-                {
-                    return new Apoteker
-                    {
-                        IdUser = Convert.ToInt32(row["id_user"]),
-                        Nama = row["nama"].ToString(),
-                        Username = row["username"].ToString(),
-                        Role = role,
-                        NomorIdentitas = row["nomor_identitas"]?.ToString(),
-                        IsActive = true
-                    };
-                }
-                else if (role == "kasir")
-                {
-                    return new Kasir
-                    {
-                        IdUser = Convert.ToInt32(row["id_user"]),
-                        Nama = row["nama"].ToString(),
-                        Username = row["username"].ToString(),
-                        Role = role,
-                        NomorShift = row["nomor_shift"]?.ToString(),
-                        IsActive = true
-                    };
-                }
+                return MapRowToUser(dt.Rows[0]);
             }
-            return null; // Login gagal
+            catch (Exception ex)
+            {
+                throw new Exception("Data user tidak valid: " + ex.Message);
+            }
+        }
+
+        // Helper reusable — dipakai juga oleh UserController
+        public static BaseUser MapRowToUser(DataRow row)
+        {
+            string role = row["role"].ToString().ToLower();
+
+            if (role == "apoteker")
+            {
+                var apoteker = new Apoteker();
+                apoteker.IdUser = Convert.ToInt32(row["id_user"]);
+                apoteker.Nama = row["nama"].ToString();
+                apoteker.Username = row["username"].ToString();
+                apoteker.Role = role;
+                apoteker.IsActive = Convert.ToBoolean(row["is_active"]);
+                apoteker.SetPassword(row["password"].ToString());
+
+                // NomorIdentitas boleh null (apoteker lama mungkin belum isi)
+                string nomor = row["nomor_identitas"] != DBNull.Value
+                    ? row["nomor_identitas"].ToString()
+                    : null;
+                if (!string.IsNullOrWhiteSpace(nomor))
+                    apoteker.NomorIdentitas = nomor;
+
+                apoteker.CreatedAt = Convert.ToDateTime(row["created_at"]);
+                return apoteker;
+            }
+            else if (role == "kasir")
+            {
+                var kasir = new Kasir();
+                kasir.IdUser = Convert.ToInt32(row["id_user"]);
+                kasir.Nama = row["nama"].ToString();
+                kasir.Username = row["username"].ToString();
+                kasir.Role = role;
+                kasir.IsActive = Convert.ToBoolean(row["is_active"]);
+                kasir.SetPassword(row["password"].ToString());
+
+                // NomorShift boleh null
+                string shift = row["nomor_shift"] != DBNull.Value
+                    ? row["nomor_shift"].ToString()
+                    : null;
+                if (!string.IsNullOrWhiteSpace(shift))
+                    kasir.NomorShift = shift;
+
+                kasir.CreatedAt = Convert.ToDateTime(row["created_at"]);
+                return kasir;
+            }
+
+            throw new Exception($"Role '{role}' tidak dikenali.");
         }
     }
 }

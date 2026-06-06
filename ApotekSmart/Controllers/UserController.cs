@@ -10,93 +10,133 @@ namespace ApotekSmart.Controllers
 {
     public class UserController : ICRUDService<BaseUser>
     {
+        private DatabaseHelper _db = DatabaseHelper.Instance;
+
         public bool Create(BaseUser entity)
         {
-            string sql = "INSERT INTO users (nama, username, password, role) VALUES (@nama, @user, @pass, @role)";
+            if (entity == null)
+                throw new ArgumentNullException("Entity tidak boleh null.");
+            try
+            {
+                string sql = @"INSERT INTO users 
+                    (nama, username, password, role, nomor_identitas, nomor_shift)
+                    VALUES (@nama, @user, @pass, @role, @identitas, @shift)";
 
-            NpgsqlParameter[] parameters = {
-                new NpgsqlParameter("@nama", entity.Nama),
-                new NpgsqlParameter("@user", entity.Username),
-                
-                // Method GetPassword() menarik data
-                new NpgsqlParameter("@pass", entity.GetPassword()),
+                string identitas = null, shift = null;
+                if (entity is Apoteker a) identitas = a.NomorIdentitas;
+                if (entity is Kasir k) shift = k.NomorShift;
 
-                new NpgsqlParameter("@role", entity.Role)
-            };
-            return DatabaseHelper.Instance.ExecuteNonQuery(sql, parameters) > 0;
+                NpgsqlParameter[] parameters = {
+                    new NpgsqlParameter("@nama",      entity.Nama),
+                    new NpgsqlParameter("@user",      entity.Username),
+                    new NpgsqlParameter("@pass",      entity.GetPassword()),
+                    new NpgsqlParameter("@role",      entity.Role),
+                    new NpgsqlParameter("@identitas", (object)identitas ?? DBNull.Value),
+                    new NpgsqlParameter("@shift",     (object)shift     ?? DBNull.Value)
+                };
+                return _db.ExecuteNonQuery(sql, parameters) > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Gagal tambah user: " + ex.Message);
+            }
         }
 
         public List<BaseUser> ReadAll()
         {
-            List<BaseUser> users = new List<BaseUser>();
-            DataTable dt = DatabaseHelper.Instance.ExecuteQuery("SELECT * FROM users");
+            var users = new List<BaseUser>();
+            DataTable dt = _db.ExecuteQuery("SELECT * FROM users ORDER BY nama");
+
             foreach (DataRow row in dt.Rows)
             {
-                if (row["role"].ToString().ToLower() == "kasir")
-                    users.Add(new Kasir { IdUser = Convert.ToInt32(row["id_user"]), Nama = row["nama"].ToString(), Role = "kasir" });
-                else
-                    users.Add(new Apoteker { IdUser = Convert.ToInt32(row["id_user"]), Nama = row["nama"].ToString(), Role = "apoteker" });
+                try
+                {
+                    users.Add(AuthController.MapRowToUser(row));
+                }
+                catch (Exception ex)
+                {
+                    // Skip baris yang datanya tidak valid, jangan crash semua list
+                    Console.WriteLine($"[WARN] Skip user id {row["id_user"]}: {ex.Message}");
+                }
             }
             return users;
         }
 
         public BaseUser ReadById(int id)
         {
+            if (id <= 0)
+                throw new ArgumentException("Id harus lebih dari 0.");
+
             string sql = "SELECT * FROM users WHERE id_user = @id";
-            NpgsqlParameter[] parameters = { new NpgsqlParameter("@id", id) };
-            DataTable dt = DatabaseHelper.Instance.ExecuteQuery(sql, parameters);
+            NpgsqlParameter[] parameters = {
+                new NpgsqlParameter("@id", id)
+            };
+            DataTable dt = _db.ExecuteQuery(sql, parameters);
+            if (dt.Rows.Count == 0) return null;
 
-            if (dt.Rows.Count > 0)
+            try
             {
-                DataRow row = dt.Rows[0];
-                string role = row["role"].ToString().ToLower();
-
-                BaseUser user;
-                if (role == "kasir")
-                {
-                    user = new Kasir();
-                }
-                else
-                {
-                    user = new Apoteker();
-                }
-
-                user.IdUser = Convert.ToInt32(row["id_user"]);
-                user.Nama = row["nama"].ToString();
-                user.Username = row["username"].ToString();
-                user.Role = row["role"].ToString();
-                user.IsActive = Convert.ToBoolean(row["is_active"]);
-
-                user.SetPassword(row["password"].ToString());
-
-                return user;
+                return AuthController.MapRowToUser(dt.Rows[0]);
             }
-            return null; // Mengembalikan null jika user dengan ID tersebut tidak ditemukan
+            catch (Exception ex)
+            {
+                throw new Exception($"Data user id {id} tidak valid: " + ex.Message);
+            }
         }
 
         public bool Update(BaseUser entity)
         {
-            string sql = "UPDATE users SET nama=@nama, username=@user, password=@pass, role=@role, is_active=@isactive WHERE id_user=@id";
+            if (entity == null)
+                throw new ArgumentNullException("Entity tidak boleh null.");
+            try
+            {
+                string sql = @"UPDATE users SET 
+                    nama            = @nama,
+                    username        = @user,
+                    password        = @pass,
+                    role            = @role,
+                    is_active       = @isactive,
+                    nomor_identitas = @identitas,
+                    nomor_shift     = @shift
+                    WHERE id_user   = @id";
 
-            NpgsqlParameter[] parameters = {
-                new NpgsqlParameter("@nama", entity.Nama),
-                new NpgsqlParameter("@user", entity.Username),
-                
-                // Memanggil GetPassword() untuk mengambil nilai _Password yang ter-enkapsulasi
-                new NpgsqlParameter("@pass", entity.GetPassword()),
+                string identitas = null, shift = null;
+                if (entity is Apoteker a) identitas = a.NomorIdentitas;
+                if (entity is Kasir k) shift = k.NomorShift;
 
-                new NpgsqlParameter("@role", entity.Role),
-                new NpgsqlParameter("@isactive", entity.IsActive),
-                new NpgsqlParameter("@id", entity.IdUser)
-            };
-
-            return DatabaseHelper.Instance.ExecuteNonQuery(sql, parameters) > 0;
+                NpgsqlParameter[] parameters = {
+                    new NpgsqlParameter("@nama",      entity.Nama),
+                    new NpgsqlParameter("@user",      entity.Username),
+                    new NpgsqlParameter("@pass",      entity.GetPassword()),
+                    new NpgsqlParameter("@role",      entity.Role),
+                    new NpgsqlParameter("@isactive",  entity.IsActive),
+                    new NpgsqlParameter("@identitas", (object)identitas ?? DBNull.Value),
+                    new NpgsqlParameter("@shift",     (object)shift     ?? DBNull.Value),
+                    new NpgsqlParameter("@id",        entity.IdUser)
+                };
+                return _db.ExecuteNonQuery(sql, parameters) > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Gagal update user: " + ex.Message);
+            }
         }
 
         public bool Delete(int id)
         {
-            string sql = "UPDATE users SET is_active = false WHERE id_user = @id"; // Soft delete
-            return DatabaseHelper.Instance.ExecuteNonQuery(sql, new NpgsqlParameter[] { new NpgsqlParameter("@id", id) }) > 0;
+            if (id <= 0)
+                throw new ArgumentException("Id harus lebih dari 0.");
+            try
+            {
+                string sql = "UPDATE users SET is_active = false WHERE id_user = @id";
+                return _db.ExecuteNonQuery(sql, new NpgsqlParameter[] {
+                    new NpgsqlParameter("@id", id)
+                }) > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Gagal hapus user: " + ex.Message);
+            }
         }
     }
 }

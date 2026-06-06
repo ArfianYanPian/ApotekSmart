@@ -7,19 +7,30 @@ namespace ApotekSmart.Helpers
     public class DatabaseHelper
     {
         private static DatabaseHelper _instance;
-        private string _connectionString;
+        // FIX: tambahkan lock object untuk thread-safety
+        private static readonly object _lock = new object();
+        private readonly string _connectionString;
 
         private DatabaseHelper()
         {
-            _connectionString = "Host=localhost;Port=5432;Database=apotek_smart;Username=postgres;Password=190727"; //ganti password sesuai dengan database Anda
+            _connectionString =
+                "Host=localhost;Port=5432;Database=apotek_smart;" +
+                "Username=postgres;Password=190727";
         }
 
+        // FIX: double-checked locking — aman diakses dari multiple thread
         public static DatabaseHelper Instance
         {
             get
             {
                 if (_instance == null)
-                    _instance = new DatabaseHelper();
+                {
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                            _instance = new DatabaseHelper();
+                    }
+                }
                 return _instance;
             }
         }
@@ -60,7 +71,8 @@ namespace ApotekSmart.Helpers
             }
         }
 
-        public void ExecuteProcedure(string procedureName, NpgsqlParameter[] parameters = null)
+        public void ExecuteProcedure(string procedureName,
+                                     NpgsqlParameter[] parameters = null)
         {
             using (var conn = GetConnection())
             {
@@ -73,6 +85,12 @@ namespace ApotekSmart.Helpers
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
+
+        // Helper untuk transaksi manual (digunakan BuatTransaksiResep, dll.)
+        public NpgsqlTransaction BeginTransaction(NpgsqlConnection conn)
+        {
+            return conn.BeginTransaction();
         }
     }
 }

@@ -1,27 +1,95 @@
-﻿public class Pembayaran
+﻿using System;
+
+namespace ApotekSmart.Models
 {
-    private decimal _jumlahBayar;
-
-    public int IdPembayaran { get; set; }
-    public int IdTransaksi { get; set; }
-    public decimal Total { get; set; }
-    public string MetodeBayar { get; set; } = "cash";
-
-    // Encapsulation — validasi jumlah bayar tidak boleh negatif
-    public decimal JumlahBayar
+    public class Pembayaran
     {
-        get { return _jumlahBayar; }
-        set
+        private int _idPembayaran;
+        private int _idTransaksi;
+        private decimal _total;
+        private decimal _jumlahBayar;
+        private string _metodeBayar;
+
+        public int IdPembayaran
         {
-            if (value < 0)
-                throw new ArgumentException("Jumlah bayar tidak boleh negatif.");
-            _jumlahBayar = value;
+            get { return _idPembayaran; }
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentException("IdPembayaran harus lebih dari 0.");
+                _idPembayaran = value;
+            }
         }
-    }
 
-    // Encapsulation — Kembalian read-only, dihitung otomatis
-    public decimal Kembalian
-    {
-        get { return _jumlahBayar - Total; }
+        public int IdTransaksi
+        {
+            get { return _idTransaksi; }
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentException("IdTransaksi harus lebih dari 0.");
+                _idTransaksi = value;
+            }
+        }
+
+        public decimal Total
+        {
+            get { return _total; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Total tidak boleh negatif.");
+                _total = value;
+            }
+        }
+
+        public decimal JumlahBayar
+        {
+            get { return _jumlahBayar; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Jumlah bayar tidak boleh negatif.");
+                _jumlahBayar = value;
+            }
+        }
+
+        // Kembalian read-only, dihitung otomatis
+        public decimal Kembalian
+        {
+            get
+            {
+                if (_jumlahBayar < _total)
+                    throw new InvalidOperationException(
+                        "Jumlah bayar tidak boleh kurang dari total.");
+                return _jumlahBayar - _total;
+            }
+        }
+
+        public string MetodeBayar
+        {
+            get { return _metodeBayar; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Metode bayar tidak boleh kosong.");
+                string v = value.Trim().ToLower();
+                if (v != "cash" && v != "transfer" && v != "kartu")
+                    throw new ArgumentException(
+                        "Metode bayar harus 'cash', 'transfer', atau 'kartu'.");
+                _metodeBayar = v;
+            }
+        }
+
+        public DateTime CreatedAt { get; set; }
+
+        public Pembayaran()
+        {
+            _metodeBayar = "cash";
+        }
+
+        public override string ToString()
+            => $"Pembayaran #{IdPembayaran} | Total: Rp {Total:N0} | " +
+               $"Bayar: Rp {JumlahBayar:N0} | Kembali: Rp {Kembalian:N0} | {MetodeBayar}";
     }
 }

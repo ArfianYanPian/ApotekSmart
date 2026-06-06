@@ -5,9 +5,7 @@ namespace ApotekSmart.Models
     public class ObatBebas : BaseObat
     {
         public override bool CekKelayakan()
-        {
-            return TanggalExp > DateTime.Now.AddDays(30);
-        }
+            => TanggalExp > DateTime.Now.AddDays(30);
 
         public string GetStatusKelayakan()
         {
