@@ -108,7 +108,6 @@
             pnlTombolAksi.Name = "pnlTombolAksi";
             pnlTombolAksi.Size = new Size(1060, 50);
             pnlTombolAksi.TabIndex = 2;
-            pnlTombolAksi.Paint += pnlTombolAksi_Paint;
             // 
             // btnEditUser
             // 

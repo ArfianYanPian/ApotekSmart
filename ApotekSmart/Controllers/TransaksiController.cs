@@ -3,6 +3,7 @@ using System.Data;
 using Npgsql;
 using ApotekSmart.Models;
 using ApotekSmart.Helpers;
+using NpgsqlTypes;
 
 namespace ApotekSmart.Controllers
 {
@@ -24,7 +25,7 @@ namespace ApotekSmart.Controllers
                 var params_ = new NpgsqlParameter[] {
                     new NpgsqlParameter("p_kasir_id",     idKasir),
                     new NpgsqlParameter("p_jenis",        jenisTransaksi),
-                    new NpgsqlParameter("p_items",        itemsJson),
+                    new NpgsqlParameter("p_items",        NpgsqlTypes.NpgsqlDbType.Json) { Value = itemsJson },
                     new NpgsqlParameter("p_jumlah_bayar", jumlahBayar)
                 };
                 _db.ExecuteProcedure("sp_proses_transaksi", params_);

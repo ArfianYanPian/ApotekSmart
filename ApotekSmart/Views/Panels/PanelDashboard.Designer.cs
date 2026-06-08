@@ -31,23 +31,23 @@
             lblWelcome = new Label();
             lblTanggal = new Label();
             pnlStatObat = new Panel();
-            lblStatObatNum = new Label();
             lblStatObatTxt = new Label();
+            lblStatObatNum = new Label();
             pnlStatTransaksi = new Panel();
-            lblStatTrxNum = new Label();
             lblStatTrxTxt = new Label();
+            lblStatTrxNum = new Label();
             pnlStatResep = new Panel();
-            lblStatResepNum = new Label();
             lblStatResepTxt = new Label();
+            lblStatResepNum = new Label();
             pnlStatAlert = new Panel();
-            lblStatAlertNum = new Label();
             lblStatAlertTxt = new Label();
+            lblStatAlertNum = new Label();
             pnlStokKritis = new Panel();
-            lblTitleStok = new Label();
             dgvStokKritis = new DataGridView();
+            lblTitleStok = new Label();
             pnlObatExp = new Panel();
-            lblTitleExp = new Label();
             dgvObatExp = new DataGridView();
+            lblTitleExp = new Label();
             pnlStatObat.SuspendLayout();
             pnlStatTransaksi.SuspendLayout();
             pnlStatResep.SuspendLayout();
@@ -89,6 +89,17 @@
             pnlStatObat.Size = new Size(240, 100);
             pnlStatObat.TabIndex = 2;
             // 
+            // lblStatObatTxt
+            // 
+            lblStatObatTxt.AutoSize = true;
+            lblStatObatTxt.BackColor = Color.Transparent;
+            lblStatObatTxt.ForeColor = Color.Gray;
+            lblStatObatTxt.Location = new Point(20, 67);
+            lblStatObatTxt.Name = "lblStatObatTxt";
+            lblStatObatTxt.Size = new Size(136, 25);
+            lblStatObatTxt.TabIndex = 1;
+            lblStatObatTxt.Text = "Total Obat Aktif";
+            // 
             // lblStatObatNum
             // 
             lblStatObatNum.AutoSize = true;
@@ -100,18 +111,6 @@
             lblStatObatNum.TabIndex = 0;
             lblStatObatNum.Text = "0";
             // 
-            // lblStatObatTxt
-            // 
-            lblStatObatTxt.AutoSize = true;
-            lblStatObatTxt.BackColor = Color.Transparent;
-            lblStatObatTxt.ForeColor = Color.Gray;
-            lblStatObatTxt.Location = new Point(20, 67);
-            lblStatObatTxt.Name = "lblStatObatTxt";
-            lblStatObatTxt.Size = new Size(136, 25);
-            lblStatObatTxt.TabIndex = 1;
-            lblStatObatTxt.Text = "Total Obat Aktif";
-            lblStatObatTxt.Click += lblStatObatTxt_Click;
-            // 
             // pnlStatTransaksi
             // 
             pnlStatTransaksi.BackColor = Color.White;
@@ -121,6 +120,16 @@
             pnlStatTransaksi.Name = "pnlStatTransaksi";
             pnlStatTransaksi.Size = new Size(240, 100);
             pnlStatTransaksi.TabIndex = 3;
+            // 
+            // lblStatTrxTxt
+            // 
+            lblStatTrxTxt.AutoSize = true;
+            lblStatTrxTxt.ForeColor = Color.Gray;
+            lblStatTrxTxt.Location = new Point(20, 68);
+            lblStatTrxTxt.Name = "lblStatTrxTxt";
+            lblStatTrxTxt.Size = new Size(143, 25);
+            lblStatTrxTxt.TabIndex = 1;
+            lblStatTrxTxt.Text = "Transaksi Hari Ini";
             // 
             // lblStatTrxNum
             // 
@@ -133,16 +142,6 @@
             lblStatTrxNum.TabIndex = 0;
             lblStatTrxNum.Text = "0";
             // 
-            // lblStatTrxTxt
-            // 
-            lblStatTrxTxt.AutoSize = true;
-            lblStatTrxTxt.ForeColor = Color.Gray;
-            lblStatTrxTxt.Location = new Point(20, 62);
-            lblStatTrxTxt.Name = "lblStatTrxTxt";
-            lblStatTrxTxt.Size = new Size(143, 25);
-            lblStatTrxTxt.TabIndex = 1;
-            lblStatTrxTxt.Text = "Transaksi Hari Ini";
-            // 
             // pnlStatResep
             // 
             pnlStatResep.BackColor = Color.White;
@@ -152,6 +151,16 @@
             pnlStatResep.Name = "pnlStatResep";
             pnlStatResep.Size = new Size(240, 100);
             pnlStatResep.TabIndex = 4;
+            // 
+            // lblStatResepTxt
+            // 
+            lblStatResepTxt.AutoSize = true;
+            lblStatResepTxt.ForeColor = Color.Gray;
+            lblStatResepTxt.Location = new Point(20, 67);
+            lblStatResepTxt.Name = "lblStatResepTxt";
+            lblStatResepTxt.Size = new Size(151, 25);
+            lblStatResepTxt.TabIndex = 1;
+            lblStatResepTxt.Text = "Resep Menunggu";
             // 
             // lblStatResepNum
             // 
@@ -164,16 +173,6 @@
             lblStatResepNum.TabIndex = 0;
             lblStatResepNum.Text = "0";
             // 
-            // lblStatResepTxt
-            // 
-            lblStatResepTxt.AutoSize = true;
-            lblStatResepTxt.ForeColor = Color.Gray;
-            lblStatResepTxt.Location = new Point(20, 62);
-            lblStatResepTxt.Name = "lblStatResepTxt";
-            lblStatResepTxt.Size = new Size(151, 25);
-            lblStatResepTxt.TabIndex = 1;
-            lblStatResepTxt.Text = "Resep Menunggu";
-            // 
             // pnlStatAlert
             // 
             pnlStatAlert.BackColor = Color.White;
@@ -183,6 +182,16 @@
             pnlStatAlert.Name = "pnlStatAlert";
             pnlStatAlert.Size = new Size(240, 100);
             pnlStatAlert.TabIndex = 5;
+            // 
+            // lblStatAlertTxt
+            // 
+            lblStatAlertTxt.AutoSize = true;
+            lblStatAlertTxt.ForeColor = Color.Gray;
+            lblStatAlertTxt.Location = new Point(20, 67);
+            lblStatAlertTxt.Name = "lblStatAlertTxt";
+            lblStatAlertTxt.Size = new Size(89, 25);
+            lblStatAlertTxt.TabIndex = 1;
+            lblStatAlertTxt.Text = "Alert Stok";
             // 
             // lblStatAlertNum
             // 
@@ -195,16 +204,6 @@
             lblStatAlertNum.TabIndex = 0;
             lblStatAlertNum.Text = "0";
             // 
-            // lblStatAlertTxt
-            // 
-            lblStatAlertTxt.AutoSize = true;
-            lblStatAlertTxt.ForeColor = Color.Gray;
-            lblStatAlertTxt.Location = new Point(20, 62);
-            lblStatAlertTxt.Name = "lblStatAlertTxt";
-            lblStatAlertTxt.Size = new Size(89, 25);
-            lblStatAlertTxt.TabIndex = 1;
-            lblStatAlertTxt.Text = "Alert Stok";
-            // 
             // pnlStokKritis
             // 
             pnlStokKritis.Controls.Add(dgvStokKritis);
@@ -213,6 +212,15 @@
             pnlStokKritis.Name = "pnlStokKritis";
             pnlStokKritis.Size = new Size(510, 380);
             pnlStokKritis.TabIndex = 6;
+            // 
+            // dgvStokKritis
+            // 
+            dgvStokKritis.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvStokKritis.Location = new Point(15, 42);
+            dgvStokKritis.Name = "dgvStokKritis";
+            dgvStokKritis.RowHeadersWidth = 62;
+            dgvStokKritis.Size = new Size(480, 330);
+            dgvStokKritis.TabIndex = 1;
             // 
             // lblTitleStok
             // 
@@ -225,15 +233,6 @@
             lblTitleStok.TabIndex = 0;
             lblTitleStok.Text = "⚠️ Stok Kritis";
             // 
-            // dgvStokKritis
-            // 
-            dgvStokKritis.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvStokKritis.Location = new Point(15, 42);
-            dgvStokKritis.Name = "dgvStokKritis";
-            dgvStokKritis.RowHeadersWidth = 62;
-            dgvStokKritis.Size = new Size(480, 330);
-            dgvStokKritis.TabIndex = 1;
-            // 
             // pnlObatExp
             // 
             pnlObatExp.BackColor = Color.White;
@@ -243,6 +242,15 @@
             pnlObatExp.Name = "pnlObatExp";
             pnlObatExp.Size = new Size(510, 380);
             pnlObatExp.TabIndex = 7;
+            // 
+            // dgvObatExp
+            // 
+            dgvObatExp.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvObatExp.Location = new Point(15, 42);
+            dgvObatExp.Name = "dgvObatExp";
+            dgvObatExp.RowHeadersWidth = 62;
+            dgvObatExp.Size = new Size(480, 330);
+            dgvObatExp.TabIndex = 1;
             // 
             // lblTitleExp
             // 
@@ -254,15 +262,6 @@
             lblTitleExp.Size = new Size(278, 28);
             lblTitleExp.TabIndex = 0;
             lblTitleExp.Text = "📅 Obat Hampir Kadaluarsa";
-            // 
-            // dgvObatExp
-            // 
-            dgvObatExp.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvObatExp.Location = new Point(15, 42);
-            dgvObatExp.Name = "dgvObatExp";
-            dgvObatExp.RowHeadersWidth = 62;
-            dgvObatExp.Size = new Size(480, 330);
-            dgvObatExp.TabIndex = 1;
             // 
             // PanelDashboard
             // 

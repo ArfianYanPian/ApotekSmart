@@ -71,15 +71,24 @@ namespace ApotekSmart.Helpers
             }
         }
 
-        public void ExecuteProcedure(string procedureName,
-                                     NpgsqlParameter[] parameters = null)
+        public void ExecuteProcedure(string procedureName, NpgsqlParameter[] parameters = null)
         {
             using (var conn = GetConnection())
             {
                 conn.Open();
-                using (var cmd = new NpgsqlCommand(procedureName, conn))
+                // PostgreSQL pakai CALL, bukan CommandType.StoredProcedure
+                string sql = $"CALL {procedureName}(";
+                if (parameters != null)
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    var paramNames = new System.Collections.Generic.List<string>();
+                    foreach (var p in parameters)
+                        paramNames.Add($"@{p.ParameterName}");
+                    sql += string.Join(", ", paramNames);
+                }
+                sql += ")";
+
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
                     if (parameters != null)
                         cmd.Parameters.AddRange(parameters);
                     cmd.ExecuteNonQuery();

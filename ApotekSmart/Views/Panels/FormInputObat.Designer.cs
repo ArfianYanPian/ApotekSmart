@@ -96,7 +96,6 @@
             cmbKategori.Name = "cmbKategori";
             cmbKategori.Size = new Size(190, 36);
             cmbKategori.TabIndex = 3;
-            cmbKategori.SelectedIndexChanged += cmbKategori_SelectedIndexChanged;
             // 
             // lblJenis
             // 
@@ -129,7 +128,6 @@
             lblGolongan.Size = new Size(95, 25);
             lblGolongan.TabIndex = 6;
             lblGolongan.Text = "Golongan";
-            lblGolongan.Click += label1_Click;
             // 
             // cmbGolongan
             // 
@@ -235,7 +233,6 @@
             lblStokMin.Size = new Size(136, 25);
             lblStokMin.TabIndex = 16;
             lblStokMin.Text = "Stok Minimum";
-            lblStokMin.Click += label1_Click_1;
             // 
             // numStokMin
             // 
@@ -327,7 +324,6 @@
             Name = "FormInputObat";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Tambah Obat";
-            Load += FormInputObat_Load;
             ((System.ComponentModel.ISupportInitialize)numStok).EndInit();
             ((System.ComponentModel.ISupportInitialize)numHargaBeli).EndInit();
             ((System.ComponentModel.ISupportInitialize)numHargaJual).EndInit();

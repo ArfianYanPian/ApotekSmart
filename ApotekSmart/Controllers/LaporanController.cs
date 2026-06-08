@@ -77,8 +77,8 @@ namespace ApotekSmart.Controllers
                 ORDER BY tanggal DESC";
 
                 var params_ = new NpgsqlParameter[] {
-                    new NpgsqlParameter("@dari",   dari),
-                    new NpgsqlParameter("@sampai", sampai)
+                    new NpgsqlParameter("@dari",   dari.Date),
+                    new NpgsqlParameter("@sampai", sampai.Date.AddDays(1).AddSeconds(-1))
                 };
                 return _db.ExecuteQuery(sql, params_);
             }

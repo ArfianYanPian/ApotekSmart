@@ -101,7 +101,6 @@
             pnlKanan.Name = "pnlKanan";
             pnlKanan.Size = new Size(640, 620);
             pnlKanan.TabIndex = 1;
-            pnlKanan.Paint += pnlKanan_Paint;
             // 
             // lblDetailResep
             // 

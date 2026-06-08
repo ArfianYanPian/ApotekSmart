@@ -36,15 +36,16 @@ namespace ApotekSmart.Models
 
             var params_ = new NpgsqlParameter[]
             {
-                new NpgsqlParameter("@dari",   tanggalMulai),
-                new NpgsqlParameter("@sampai", tanggalAkhir)
+                new NpgsqlParameter("@dari",   tanggalMulai.Date),
+                new NpgsqlParameter("@sampai", tanggalAkhir.Date.AddDays(1).AddSeconds(-1))
             };
             return _db.ExecuteQuery(sql, params_);
         }
 
         public void CetakLaporan()
         {
-            Console.WriteLine("Laporan Bulanan ApotekSmart");
+            // TODO: Implementasi cetak/export laporan
+            throw new NotImplementedException("CetakLaporan belum diimplementasi.");
         }
     }
 }
