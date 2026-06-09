@@ -8,10 +8,6 @@ namespace ApotekSmart.Controllers
 {
     public class AuthController
     {
-        // TODO (sebelum production): ganti ke password hashing (BCrypt.Net-Next via NuGet)
-        // Install: Install-Package BCrypt.Net-Next
-        // Login: BCrypt.Net.BCrypt.Verify(inputPassword, storedHash)
-        // Register/Update: BCrypt.Net.BCrypt.HashPassword(plainPassword)
 
         public BaseUser Login(string username, string password)
         {

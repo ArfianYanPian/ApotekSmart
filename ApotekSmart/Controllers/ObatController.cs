@@ -188,7 +188,9 @@ namespace ApotekSmart.Controllers
             obat.Stok = Convert.ToInt32(row["stok"]);
             obat.StokMinimum = Convert.ToInt32(row["stok_minimum"]);
             // FIX: TanggalExp di-set tanpa validasi masa lalu — obat kadaluarsa tetap bisa di-load
-            obat.TanggalExp = Convert.ToDateTime(row["tanggal_exp"]);
+            obat.TanggalExp = row["tanggal_exp"] is DateOnly d
+                ? d.ToDateTime(TimeOnly.MinValue)
+                : Convert.ToDateTime(row["tanggal_exp"]);
             obat.IsActive = Convert.ToBoolean(row["is_active"]);
             obat.Deskripsi = row["deskripsi"] != DBNull.Value
                 ? row["deskripsi"].ToString()
