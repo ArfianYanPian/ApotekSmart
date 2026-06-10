@@ -198,7 +198,7 @@ namespace ApotekSmart.Views
 
             if (result == DialogResult.Yes)
             {
-                var formLogin = new FormLogin();
+                FormLogin formLogin = new FormLogin();
                 formLogin.Show();
                 this.Close();
             }

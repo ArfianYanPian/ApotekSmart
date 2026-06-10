@@ -94,7 +94,7 @@ namespace ApotekSmart.Views
                 var formMain = new FormMain(user);
                 formMain.Show();
                 this.Hide();
-                formMain.FormClosed += (s, args) => this.Close();
+                formMain.FormClosed += (s, args) => this.Show();
             }
             catch (Exception ex)
             {
