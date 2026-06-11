@@ -2,8 +2,12 @@
 
 namespace ApotekSmart.Models
 {
+    // [CLASS LIBRARY] Bagian dari Models library dalam namespace ApotekSmart.Models
+    // [AGGREGATION] ItemTransaksi menyimpan referensi ke BaseObat
+    // BaseObat bisa hidup tanpa ItemTransaksi — obat tetap ada walau item dihapus
     public class ItemTransaksi
     {
+        // [ENCAPSULATION] Semua field private, hanya bisa diakses lewat property
         private int _idDetailTransaksi;
         private int _idTransaksi;
         private BaseObat _obat;
@@ -11,6 +15,7 @@ namespace ApotekSmart.Models
         private decimal _hargaSatuan;
         private string _aturanPakai;
 
+        // [ENCAPSULATION] Property dengan validasi di setter
         public int IdDetailTransaksi
         {
             get { return _idDetailTransaksi; }
@@ -33,6 +38,10 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [AGGREGATION] _obat adalah referensi ke BaseObat
+        // ItemTransaksi tidak memiliki/menciptakan BaseObat
+        // BaseObat bisa hidup sendiri tanpa ItemTransaksi
+        // [POLYMORPHISM] _obat bertipe BaseObat — bisa menampung ObatBebas maupun ObatResep
         public BaseObat Obat
         {
             get { return _obat; }
@@ -69,15 +78,18 @@ namespace ApotekSmart.Models
         public string AturanPakai
         {
             get { return _aturanPakai; }
-            set { _aturanPakai = value; } // boleh null/kosong
+            set { _aturanPakai = value; }
         }
 
-        // FIX: kurung kurawal diperbaiki
+        // [ENCAPSULATION] Subtotal read-only — dihitung otomatis dari _qty dan _hargaSatuan
+        // Tidak bisa diset dari luar, mencegah manipulasi nilai subtotal
         public decimal Subtotal
         {
             get { return _qty * _hargaSatuan; }
         }
 
+        // [POLYMORPHISM] override ToString() dari class Object bawaan C#
+        // [AGGREGATION] Akses NamaObat lewat referensi _obat
         public override string ToString()
             => $"{_obat?.NamaObat ?? "-"} x{_qty} @ Rp {_hargaSatuan:N0} = Rp {Subtotal:N0}";
     }

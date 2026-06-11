@@ -2,14 +2,19 @@
 
 namespace ApotekSmart.Models
 {
+    // [CLASS LIBRARY] Bagian dari Models library dalam namespace ApotekSmart.Models
+    // [ASSOCIATION] Pembayaran berelasi dengan Transaksi lewat IdTransaksi
+    // Pembayaran tidak memiliki objek Transaksi langsung, hanya menyimpan ID-nya
     public class Pembayaran
     {
+        // [ENCAPSULATION] Semua field private, hanya bisa diakses lewat property
         private int _idPembayaran;
         private int _idTransaksi;
         private decimal _total;
         private decimal _jumlahBayar;
         private string _metodeBayar;
 
+        // [ENCAPSULATION] Property dengan validasi di setter
         public int IdPembayaran
         {
             get { return _idPembayaran; }
@@ -54,7 +59,9 @@ namespace ApotekSmart.Models
             }
         }
 
-        // Kembalian read-only, dihitung otomatis
+        // [ENCAPSULATION] Kembalian read-only — dihitung otomatis dari _jumlahBayar dan _total
+        // Tidak bisa diset dari luar, mencegah manipulasi nilai kembalian
+        // Validasi bisnis: jumlah bayar tidak boleh kurang dari total
         public decimal Kembalian
         {
             get
@@ -66,6 +73,8 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [ENCAPSULATION] MetodeBayar hanya izinkan 3 nilai: cash, transfer, kartu
+        // Normalisasi otomatis ke lowercase di dalam setter
         public string MetodeBayar
         {
             get { return _metodeBayar; }
@@ -83,11 +92,14 @@ namespace ApotekSmart.Models
 
         public DateTime CreatedAt { get; set; }
 
+        // [ENCAPSULATION] Constructor mengatur nilai default MetodeBayar = "cash"
+        // Memastikan objek selalu dalam state valid sejak dibuat
         public Pembayaran()
         {
             _metodeBayar = "cash";
         }
 
+        // [POLYMORPHISM] override ToString() dari class Object bawaan C#
         public override string ToString()
             => $"Pembayaran #{IdPembayaran} | Total: Rp {Total:N0} | " +
                $"Bayar: Rp {JumlahBayar:N0} | Kembali: Rp {Kembalian:N0} | {MetodeBayar}";

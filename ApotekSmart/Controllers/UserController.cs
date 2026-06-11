@@ -8,10 +8,19 @@ using ApotekSmart.Interfaces;
 
 namespace ApotekSmart.Controllers
 {
+    // [INTERFACE] UserController mengimplementasikan ICRUDService<BaseUser>
+    // Wajib mengimplementasikan semua 5 method CRUD
+    // [CLASS LIBRARY] Bagian dari Controllers library dalam namespace ApotekSmart.Controllers
     public class UserController : ICRUDService<BaseUser>
     {
+        // [ASSOCIATION] UserController menggunakan DatabaseHelper
+        // DatabaseHelper bisa hidup tanpa UserController
+        // [ENCAPSULATION] _db private — akses database tersembunyi dari luar
         private DatabaseHelper _db = DatabaseHelper.Instance;
 
+        // [INTERFACE] Implementasi Create() dari ICRUDService<BaseUser>
+        // [POLYMORPHISM] entity bertipe BaseUser — bisa Apoteker atau Kasir
+        // [ENCAPSULATION] Detail SQL query tersembunyi di dalam method
         public bool Create(BaseUser entity)
         {
             if (entity == null)
@@ -22,6 +31,8 @@ namespace ApotekSmart.Controllers
                     (nama, username, password, role, nomor_identitas, nomor_shift)
                     VALUES (@nama, @user, @pass, @role, @identitas, @shift)";
 
+                // [POLYMORPHISM] Cek tipe asli entity — Apoteker atau Kasir
+                // is pattern matching untuk membedakan subclass
                 string identitas = null, shift = null;
                 if (entity is Apoteker a) identitas = a.NomorIdentitas;
                 if (entity is Kasir k) shift = k.NomorShift;
@@ -42,6 +53,9 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [INTERFACE] Implementasi ReadAll() dari ICRUDService<BaseUser>
+        // [POLYMORPHISM] Mengembalikan List<BaseUser> yang bisa berisi Apoteker dan Kasir
+        // [ENCAPSULATION] Detail query dan mapping tersembunyi dari pemanggil
         public List<BaseUser> ReadAll()
         {
             var users = new List<BaseUser>();
@@ -51,17 +65,20 @@ namespace ApotekSmart.Controllers
             {
                 try
                 {
+                    // [POLYMORPHISM] MapRowToUser() mengembalikan Apoteker atau Kasir
+                    // tergantung kolom role di database
                     users.Add(AuthController.MapRowToUser(row));
                 }
                 catch (Exception ex)
                 {
-                    // Skip baris yang datanya tidak valid, jangan crash semua list
                     Console.WriteLine($"[WARN] Skip user id {row["id_user"]}: {ex.Message}");
                 }
             }
             return users;
         }
 
+        // [INTERFACE] Implementasi ReadById() dari ICRUDService<BaseUser>
+        // [POLYMORPHISM] Mengembalikan BaseUser — bisa Apoteker atau Kasir
         public BaseUser ReadById(int id)
         {
             if (id <= 0)
@@ -76,6 +93,7 @@ namespace ApotekSmart.Controllers
 
             try
             {
+                // [POLYMORPHISM] MapRowToUser() otomatis kembalikan tipe yang tepat
                 return AuthController.MapRowToUser(dt.Rows[0]);
             }
             catch (Exception ex)
@@ -84,6 +102,9 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [INTERFACE] Implementasi Update() dari ICRUDService<BaseUser>
+        // [POLYMORPHISM] entity bertipe BaseUser — bisa Apoteker atau Kasir
+        // [ENCAPSULATION] Detail SQL tersembunyi, pemanggil cukup kirim entity
         public bool Update(BaseUser entity)
         {
             if (entity == null)
@@ -100,6 +121,7 @@ namespace ApotekSmart.Controllers
                     nomor_shift     = @shift
                     WHERE id_user   = @id";
 
+                // [POLYMORPHISM] Cek tipe asli entity untuk ambil field spesifik
                 string identitas = null, shift = null;
                 if (entity is Apoteker a) identitas = a.NomorIdentitas;
                 if (entity is Kasir k) shift = k.NomorShift;
@@ -122,6 +144,9 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [INTERFACE] Implementasi Delete() dari ICRUDService<BaseUser>
+        // [ENCAPSULATION] Soft delete — is_active = false, data tidak benar-benar dihapus
+        // Detail implementasi tersembunyi dari pemanggil
         public bool Delete(int id)
         {
             if (id <= 0)

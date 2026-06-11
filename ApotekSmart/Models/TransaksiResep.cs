@@ -2,8 +2,11 @@
 
 namespace ApotekSmart.Models
 {
+    // [INHERITANCE] TransaksiResep mewarisi semua property dan method dari BaseTransaksi
+    // [CLASS LIBRARY] Bagian dari Models library dalam namespace ApotekSmart.Models
     public class TransaksiResep : BaseTransaksi
     {
+        // [ENCAPSULATION] Semua field private, hanya bisa diakses lewat property
         private int _idResep;
         private int? _idApoteker;
         private string _nomorResep;
@@ -13,6 +16,7 @@ namespace ApotekSmart.Models
         private string _catatanApoteker;
         private DateTime? _validatedAt;
 
+        // [ENCAPSULATION] Property dengan validasi di setter
         public int IdResep
         {
             get { return _idResep; }
@@ -68,6 +72,7 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [ENCAPSULATION] StatusValidasi hanya izinkan 3 nilai yang valid
         public string StatusValidasi
         {
             get { return _statusValidasi; }
@@ -80,12 +85,14 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [ENCAPSULATION] CatatanApoteker boleh null/kosong
         public string CatatanApoteker
         {
             get { return _catatanApoteker; }
-            set { _catatanApoteker = value; } // boleh null/kosong
+            set { _catatanApoteker = value; }
         }
 
+        // [ENCAPSULATION] ValidatedAt tidak boleh di masa depan
         public DateTime? ValidatedAt
         {
             get { return _validatedAt; }
@@ -97,8 +104,13 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [AGGREGATION] TransaksiResep menyimpan referensi ke Apoteker
+        // Apoteker bisa hidup tanpa TransaksiResep
+        // Resep bisa dibuat dulu sebelum ada Apoteker yang validasi (nullable)
         public Apoteker Apoteker { get; set; }
 
+        // [ENCAPSULATION] Constructor mengatur nilai default yang valid
+        // JenisTransaksi, StatusValidasi, Status diset otomatis saat dibuat
         public TransaksiResep()
         {
             JenisTransaksi = "resep";
@@ -106,6 +118,9 @@ namespace ApotekSmart.Models
             Status = "menunggu";
         }
 
+        // [POLYMORPHISM] override ProsesTransaksi() dari BaseTransaksi
+        // Implementasi khusus TransaksiResep — proses bergantung pada StatusValidasi
+        // Berbeda dengan transaksi biasa yang langsung selesai
         public override void ProsesTransaksi()
         {
             if (StatusValidasi == "disetujui")
@@ -125,9 +140,12 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [POLYMORPHISM] override CetakStruk() dari BaseTransaksi
+        // Memanggil base.CetakStruk() lalu menambahkan info khusus resep
+        // Ini contoh POLYMORPHISM + pemanfaatan method parent lewat base
         public override void CetakStruk()
         {
-            base.CetakStruk();
+            base.CetakStruk(); // panggil CetakStruk() milik BaseTransaksi
             Console.WriteLine($"Nomor Resep    : {NomorResep}");
             Console.WriteLine($"Nama Pasien    : {NamaPasien}");
             Console.WriteLine($"Nama Dokter    : {NamaDokter}");

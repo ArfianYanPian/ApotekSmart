@@ -3,14 +3,18 @@ using System.Collections.Generic;
 
 namespace ApotekSmart.Models
 {
+    // [ABSTRACT CLASS] BaseTransaksi adalah abstract class — tidak bisa diinstansiasi langsung
+    // [CLASS LIBRARY] Bagian dari Models library dalam namespace ApotekSmart.Models
     public abstract class BaseTransaksi
     {
+        // [ENCAPSULATION] Semua field private, hanya bisa diakses lewat property
         private int _idTransaksi;
         private int _idKasir;
         private string _jenisTransaksi;
         private string _status;
         private DateTime _createdAt;
 
+        // [ENCAPSULATION] Property dengan validasi di setter
         public int IdTransaksi
         {
             get { return _idTransaksi; }
@@ -33,6 +37,7 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [ENCAPSULATION] Setter membatasi nilai hanya 'biasa' atau 'resep'
         public string JenisTransaksi
         {
             get { return _jenisTransaksi; }
@@ -44,6 +49,7 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [ENCAPSULATION] Setter membatasi nilai status yang valid
         public string Status
         {
             get { return _status; }
@@ -67,11 +73,21 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [ENCAPSULATION] Total hanya bisa diubah dari dalam class (protected set)
+        // Tidak bisa diset dari luar — harus lewat HitungTotal()
         public decimal Total { get; protected set; }
 
+        // [COMPOSITION] BaseTransaksi memiliki List<ItemTransaksi>
+        // Jika BaseTransaksi dihancurkan, Items ikut dihancurkan
+        // [ASSOCIATION] BaseTransaksi berelasi dengan class Kasir
         public List<ItemTransaksi> Items { get; set; } = new List<ItemTransaksi>();
+
+        // [ASSOCIATION] BaseTransaksi berelasi dengan Kasir
+        // Kasir bisa hidup tanpa BaseTransaksi
         public Kasir Kasir { get; set; }
 
+        // [ENCAPSULATION] HitungTotal() mengontrol cara Total dihitung
+        // Total tidak bisa dimanipulasi langsung dari luar
         public void HitungTotal()
         {
             Total = 0;
@@ -79,8 +95,12 @@ namespace ApotekSmart.Models
                 Total += item.Subtotal;
         }
 
+        // [ABSTRACT] ProsesTransaksi wajib di-override oleh subclass
+        // [POLYMORPHISM] TransaksiBiasa dan TransaksiResep punya proses berbeda
         public abstract void ProsesTransaksi();
 
+        // [POLYMORPHISM] virtual — subclass boleh override CetakStruk()
+        // TransaksiResep misalnya menambahkan info nomor resep di struk
         public virtual void CetakStruk()
         {
             Console.WriteLine("=====================================");

@@ -2,16 +2,20 @@
 
 namespace ApotekSmart.Models
 {
+    // [ABSTRACT CLASS] BaseUser adalah abstract class — tidak bisa diinstansiasi langsung
+    // [CLASS LIBRARY] Bagian dari Models library dalam namespace ApotekSmart.Models
     public abstract class BaseUser
     {
+        // [ENCAPSULATION] Semua field private, hanya bisa diakses lewat property
         private int _idUser;
         private string _nama;
         private string _username;
-        private string _password;
+        private string _password;  // [ENCAPSULATION] _password sepenuhnya tersembunyi, tidak ada getter property langsung
         private string _role;
         private DateTime _createdAt;
         private bool _isActive;
 
+        // [ENCAPSULATION] Property dengan validasi di setter — data tidak bisa diisi sembarangan
         public int IdUser
         {
             get { return _idUser; }
@@ -75,8 +79,12 @@ namespace ApotekSmart.Models
             set { _isActive = value; }
         }
 
+        // [ABSTRACT] Method abstract — wajib di-override oleh setiap subclass
+        // [POLYMORPHISM] Setiap subclass (Apoteker, Kasir) punya implementasi TampilInfo() sendiri
         public abstract void TampilInfo();
 
+        // [ENCAPSULATION] SetPassword & GetPassword mengontrol akses ke _password
+        // _password tidak punya public property getter — hanya bisa diset dan dicek lewat method ini
         public void SetPassword(string password)
         {
             if (string.IsNullOrEmpty(password))
@@ -87,6 +95,7 @@ namespace ApotekSmart.Models
         public bool CekPassword(string password) => _password == password;
         public string GetPassword() => _password;
 
+        // [POLYMORPHISM] virtual — subclass boleh override method Login ini
         public virtual bool Login(string username, string password)
             => Username == username && CekPassword(password) && IsActive;
     }

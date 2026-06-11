@@ -6,10 +6,19 @@ using ApotekSmart.Interfaces;
 
 namespace ApotekSmart.Models
 {
+    // [INTERFACE] LaporanHarian mengimplementasikan interface ILaporan
+    // Wajib mengimplementasikan GenerateLaporan() dan CetakLaporan()
+    // [CLASS LIBRARY] Bagian dari Models library dalam namespace ApotekSmart.Models
     public class LaporanHarian : ILaporan
     {
+        // [ASSOCIATION] LaporanHarian menggunakan DatabaseHelper
+        // DatabaseHelper bisa hidup tanpa LaporanHarian
+        // [ENCAPSULATION] _db private — akses database tersembunyi dari luar
         private DatabaseHelper _db = DatabaseHelper.Instance;
 
+        // [INTERFACE] Implementasi method GenerateLaporan() dari ILaporan
+        // [ENCAPSULATION] Detail query SQL tersembunyi di dalam method
+        // Berbeda dengan LaporanBulanan — ada kolom HARI dan GROUP BY 3 level
         public DataTable GenerateLaporan(DateTime tanggalMulai, DateTime tanggalAkhir)
         {
             if (tanggalMulai > tanggalAkhir)
@@ -40,6 +49,9 @@ namespace ApotekSmart.Models
             return _db.ExecuteQuery(sql, params_);
         }
 
+        // [INTERFACE] Implementasi method CetakLaporan() dari ILaporan
+        // [POLYMORPHISM] Implementasi berbeda dengan LaporanBulanan
+        // meski keduanya sama-sama mengimplementasikan ILaporan
         public void CetakLaporan()
         {
             // TODO: Implementasi cetak/export laporan

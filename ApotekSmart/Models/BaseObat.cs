@@ -2,8 +2,11 @@
 
 namespace ApotekSmart.Models
 {
+    // [ABSTRACT CLASS] BaseObat adalah abstract class — tidak bisa diinstansiasi langsung
+    // [CLASS LIBRARY] Bagian dari Models library dalam namespace ApotekSmart.Models
     public abstract class BaseObat
     {
+        // [ENCAPSULATION] Semua field private, hanya bisa diakses lewat property
         private int _idObat;
         private int _idKategori;
         private string _namaObat;
@@ -17,6 +20,7 @@ namespace ApotekSmart.Models
         private string _deskripsi;
         private bool _isActive;
 
+        // [ENCAPSULATION] Property dengan validasi di setter
         public int IdObat
         {
             get { return _idObat; }
@@ -50,6 +54,7 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [ENCAPSULATION] Setter membatasi nilai hanya 'bebas' atau 'resep'
         public string Jenis
         {
             get { return _jenis; }
@@ -72,6 +77,7 @@ namespace ApotekSmart.Models
             }
         }
 
+        // [ENCAPSULATION] Validasi nilai tidak boleh negatif
         public decimal HargaBeli
         {
             get { return _hargaBeli; }
@@ -83,8 +89,6 @@ namespace ApotekSmart.Models
             }
         }
 
-        // FIX: validasi hargaJual < hargaBeli dipindah ke method Validate()
-        // agar tidak crash saat urutan set property tidak menentu
         public decimal HargaJual
         {
             get { return _hargaJual; }
@@ -118,8 +122,6 @@ namespace ApotekSmart.Models
             }
         }
 
-        // FIX: hapus validasi masa lalu — obat kadaluarsa dari DB tetap harus bisa di-load.
-        // Validasi kelayakan dilakukan di CekKelayakan() / GetStatusKelayakan().
         public DateTime TanggalExp
         {
             get { return _tanggalExp; }
@@ -129,7 +131,7 @@ namespace ApotekSmart.Models
         public string Deskripsi
         {
             get { return _deskripsi; }
-            set { _deskripsi = value; } // boleh null/kosong
+            set { _deskripsi = value; }
         }
 
         public bool IsActive
@@ -138,7 +140,8 @@ namespace ApotekSmart.Models
             set { _isActive = value; }
         }
 
-        // Validasi bisnis yang bergantung pada kombinasi field
+        // [POLYMORPHISM] virtual — subclass boleh override Validate()
+        // [ENCAPSULATION] Validasi kombinasi field dilakukan di dalam class, bukan di luar
         public virtual void Validate()
         {
             if (_hargaJual < _hargaBeli)
@@ -150,8 +153,11 @@ namespace ApotekSmart.Models
                 throw new InvalidOperationException("Nama obat tidak boleh kosong.");
         }
 
+        // [ABSTRACT] Method abstract — wajib di-override oleh ObatBebas dan ObatResep
+        // [POLYMORPHISM] ObatBebas dan ObatResep punya logika CekKelayakan() berbeda
         public abstract bool CekKelayakan();
 
+        // [POLYMORPHISM] override ToString() dari class Object bawaan C#
         public override string ToString()
             => $"{NamaObat} - Stok: {Stok} - Exp: {TanggalExp:dd/MM/yyyy}";
     }
