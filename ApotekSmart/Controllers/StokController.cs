@@ -5,10 +5,17 @@ using ApotekSmart.Helpers;
 
 namespace ApotekSmart.Controllers
 {
+    // [CLASS LIBRARY] Bagian dari Controllers library dalam namespace ApotekSmart.Controllers
     public class StokController
     {
+        // [ASSOCIATION] StokController menggunakan DatabaseHelper
+        // DatabaseHelper bisa hidup tanpa StokController
+        // [ENCAPSULATION] _db private — akses database tersembunyi dari luar
         private DatabaseHelper _db = DatabaseHelper.Instance;
 
+        // [ENCAPSULATION] Detail pemanggilan stored procedure sp_update_stok tersembunyi
+        // Trigger trg_log_perubahan_stok dan trg_cek_stok_minimum
+        // jalan otomatis di DB — pemanggil tidak perlu tahu
         public bool UpdateStok(int idObat, int qtyMasuk,
                                string keterangan, int idUser)
         {
@@ -37,6 +44,8 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [ENCAPSULATION] Detail query VIEW v_stok_obat tersembunyi
+        // Pemanggil cukup dapat DataTable stok kritis
         public DataTable GetStokKritis()
         {
             try
@@ -53,6 +62,8 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [ENCAPSULATION] Detail query VIEW v_obat_kadaluarsa tersembunyi
+        // Pemanggil tidak perlu tahu struktur view-nya
         public DataTable GetObatKadaluarsa()
         {
             try
@@ -65,6 +76,9 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [ENCAPSULATION] GetLogStok() menyembunyikan 2 query berbeda
+        // (filter by idObat vs semua) di balik 1 method dengan parameter opsional
+        // Pemanggil tidak perlu tahu ada 2 query berbeda di dalamnya
         public DataTable GetLogStok(int? idObat = null)
         {
             if (idObat.HasValue && idObat.Value <= 0)
@@ -95,6 +109,8 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [ENCAPSULATION] Detail query alert_stok tersembunyi
+        // Pemanggil cukup dapat DataTable alert yang belum dibaca
         public DataTable GetAlertStok()
         {
             try
@@ -111,6 +127,8 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [ENCAPSULATION] Detail UPDATE alert_stok tersembunyi dari pemanggil
+        // Pemanggil cukup kirim idAlert, tidak perlu tahu SQL-nya
         public bool TandaiAlertDibaca(int idAlert)
         {
             if (idAlert <= 0)

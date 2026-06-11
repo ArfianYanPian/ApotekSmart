@@ -6,15 +6,22 @@ using ApotekSmart.Helpers;
 
 namespace ApotekSmart.Controllers
 {
+    // [CLASS LIBRARY] Bagian dari Controllers library dalam namespace ApotekSmart.Controllers
     public class ObatController
     {
+        // [ASSOCIATION] ObatController menggunakan DatabaseHelper
+        // DatabaseHelper bisa hidup tanpa ObatController
+        // [ENCAPSULATION] _db private — akses database tersembunyi dari luar
         private DatabaseHelper _db = DatabaseHelper.Instance;
 
+        // [ENCAPSULATION] Detail query VIEW v_stok_obat tersembunyi
+        // Pemanggil cukup dapat DataTable semua obat
         public DataTable GetAllObat()
         {
             return _db.ExecuteQuery("SELECT * FROM v_stok_obat ORDER BY nama_obat");
         }
 
+        // [ENCAPSULATION] Detail query dengan parameter tersembunyi
         public DataTable GetObatById(int idObat)
         {
             if (idObat <= 0)
@@ -26,6 +33,8 @@ namespace ApotekSmart.Controllers
             });
         }
 
+        // [ENCAPSULATION] SearchObat() menyembunyikan kompleksitas query
+        // dengan 4 filter sekaligus di balik 1 method yang mudah dipanggil
         public DataTable SearchObat(string nama = "", string kategori = "",
                                     decimal hargaMin = 0, decimal hargaMax = 999999999)
         {
@@ -48,18 +57,21 @@ namespace ApotekSmart.Controllers
             return _db.ExecuteQuery(sql, params_);
         }
 
+        // [POLYMORPHISM] obat bertipe BaseObat — bisa ObatBebas atau ObatResep
+        // [ENCAPSULATION] obat.Validate() — validasi bisnis dipanggil dari dalam model
+        // bukan dari form/UI — sesuai prinsip business rule validation
         public bool TambahObat(BaseObat obat)
         {
             if (obat == null)
                 throw new ArgumentNullException("obat", "Obat tidak boleh null.");
 
-            // Validasi bisnis (hargaJual >= hargaBeli, dll.)
+            // [ENCAPSULATION] Validate() di BaseObat/ObatResep menjaga aturan bisnis
             obat.Validate();
 
             try
             {
-                // FIX: ganti pattern matching 'is T varname' ke 'as T' agar
-                // kompatibel dengan semua versi .NET Framework
+                // [POLYMORPHISM] Cek tipe asli obat — ObatResep atau ObatBebas
+                // ObatResep punya GolonganObat, ObatBebas tidak
                 var obatResep = obat as ObatResep;
                 object golongan = (obatResep != null)
                     ? (object)obatResep.GolonganObat
@@ -93,15 +105,19 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [POLYMORPHISM] obat bertipe BaseObat — bisa ObatBebas atau ObatResep
+        // [ENCAPSULATION] Detail SQL UPDATE tersembunyi, pemanggil cukup kirim object
         public bool EditObat(BaseObat obat)
         {
             if (obat == null)
                 throw new ArgumentNullException("obat", "Obat tidak boleh null.");
 
+            // [ENCAPSULATION] Validate() memastikan aturan bisnis tetap terjaga saat edit
             obat.Validate();
 
             try
             {
+                // [POLYMORPHISM] Cek tipe asli obat untuk ambil GolonganObat
                 var obatResep = obat as ObatResep;
                 object golongan = (obatResep != null)
                     ? (object)obatResep.GolonganObat
@@ -141,6 +157,8 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [ENCAPSULATION] Soft delete — is_active = false
+        // Detail implementasi tersembunyi, pemanggil tidak tahu cara teknisnya
         public bool HapusObat(int idObat)
         {
             if (idObat <= 0)
@@ -158,11 +176,16 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [POLYMORPHISM] MapRowToObat() mengembalikan BaseObat
+        // tapi tipe aslinya bisa ObatBebas atau ObatResep tergantung kolom jenis
+        // [ENCAPSULATION] Detail mapping DataRow ke object tersembunyi
+        // Pemanggil cukup dapat BaseObat tanpa tahu cara mapping-nya
         public static BaseObat MapRowToObat(DataRow row)
         {
             string jenis = row["jenis"].ToString();
             BaseObat obat;
 
+            // [POLYMORPHISM] Instansiasi tipe yang tepat berdasarkan jenis
             if (jenis == "resep")
             {
                 var obatResep = new ObatResep();
@@ -178,6 +201,7 @@ namespace ApotekSmart.Controllers
                 obat = new ObatBebas();
             }
 
+            // Set property BaseObat — berlaku untuk ObatBebas maupun ObatResep
             obat.IdObat = Convert.ToInt32(row["id_obat"]);
             obat.IdKategori = Convert.ToInt32(row["id_kategori"]);
             obat.NamaObat = row["nama_obat"].ToString();
@@ -187,7 +211,6 @@ namespace ApotekSmart.Controllers
             obat.HargaJual = Convert.ToDecimal(row["harga_jual"]);
             obat.Stok = Convert.ToInt32(row["stok"]);
             obat.StokMinimum = Convert.ToInt32(row["stok_minimum"]);
-            // FIX: TanggalExp di-set tanpa validasi masa lalu — obat kadaluarsa tetap bisa di-load
             obat.TanggalExp = row["tanggal_exp"] is DateOnly d
                 ? d.ToDateTime(TimeOnly.MinValue)
                 : Convert.ToDateTime(row["tanggal_exp"]);
@@ -198,6 +221,7 @@ namespace ApotekSmart.Controllers
             return obat;
         }
 
+        // [ENCAPSULATION] Detail query kategori tersembunyi
         public DataTable GetAllKategori()
         {
             return _db.ExecuteQuery("SELECT * FROM kategori ORDER BY nama_kategori");

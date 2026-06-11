@@ -6,10 +6,16 @@ using ApotekSmart.Models;
 
 namespace ApotekSmart.Controllers
 {
+    // [CLASS LIBRARY] Bagian dari Controllers library dalam namespace ApotekSmart.Controllers
     public class LaporanController
     {
+        // [ASSOCIATION] LaporanController menggunakan DatabaseHelper
+        // DatabaseHelper bisa hidup tanpa LaporanController
+        // [ENCAPSULATION] _db private — akses database tersembunyi dari luar
         private DatabaseHelper _db = DatabaseHelper.Instance;
 
+        // [ENCAPSULATION] ValidasiTanggal() private — logika validasi tersembunyi
+        // Dipakai ulang oleh 3 method laporan tanpa duplikasi kode
         private void ValidasiTanggal(DateTime dari, DateTime sampai)
         {
             if (dari > sampai)
@@ -17,11 +23,17 @@ namespace ApotekSmart.Controllers
                     "Tanggal mulai tidak boleh lebih besar dari tanggal akhir.");
         }
 
+        // [POLYMORPHISM] Membuat objek LaporanHarian yang implements ILaporan
+        // LaporanController tidak perlu tahu detail implementasi GenerateLaporan()
+        // Cukup panggil lewat interface ILaporan
+        // [ENCAPSULATION] ValidasiTanggal() dipanggil dulu sebelum generate
         public DataTable GetLaporanHarian(DateTime dari, DateTime sampai)
         {
             ValidasiTanggal(dari, sampai);
             try
             {
+                // [POLYMORPHISM] new LaporanHarian() bertipe ILaporan
+                // GenerateLaporan() dipanggil sesuai implementasi LaporanHarian
                 return new LaporanHarian().GenerateLaporan(dari, sampai);
             }
             catch (Exception ex)
@@ -30,11 +42,16 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [POLYMORPHISM] Membuat objek LaporanBulanan yang implements ILaporan
+        // Cara pemanggilan sama persis dengan GetLaporanHarian()
+        // tapi GenerateLaporan() yang dijalankan berbeda
         public DataTable GetLaporanBulanan(DateTime dari, DateTime sampai)
         {
             ValidasiTanggal(dari, sampai);
             try
             {
+                // [POLYMORPHISM] new LaporanBulanan() — GenerateLaporan() berbeda
+                // GROUP BY ROLLUP(tahun, bulan) vs ROLLUP(tahun, bulan, hari)
                 return new LaporanBulanan().GenerateLaporan(dari, sampai);
             }
             catch (Exception ex)
@@ -43,6 +60,8 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [ENCAPSULATION] Detail query UNION ALL transaksi biasa + resep tersembunyi
+        // Pemanggil cukup kirim tanggal, dapat DataTable gabungan
         public DataTable GetLaporanResep(DateTime dari, DateTime sampai)
         {
             ValidasiTanggal(dari, sampai);
@@ -88,6 +107,8 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [ENCAPSULATION] Detail 4 subquery COUNT tersembunyi di dalam method
+        // Pemanggil cukup dapat 1 DataRow berisi 4 angka summary
         public DataTable GetSummaryDashboard()
         {
             try

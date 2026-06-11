@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Data;
 using Npgsql;
 using ApotekSmart.Models;
@@ -8,10 +7,16 @@ using NpgsqlTypes;
 
 namespace ApotekSmart.Controllers
 {
+    // [CLASS LIBRARY] Bagian dari Controllers library dalam namespace ApotekSmart.Controllers
     public class TransaksiController
     {
+        // [ASSOCIATION] TransaksiController menggunakan DatabaseHelper
+        // DatabaseHelper bisa hidup tanpa TransaksiController
+        // [ENCAPSULATION] _db private — akses database tersembunyi dari luar
         private DatabaseHelper _db = DatabaseHelper.Instance;
 
+        // [ENCAPSULATION] Detail pemanggilan stored procedure tersembunyi
+        // Pemanggil cukup kirim parameter, tidak perlu tahu cara kerja SP di PostgreSQL
         public bool ProsesBayar(int idKasir, string jenisTransaksi,
                                  string itemsJson, decimal jumlahBayar)
         {
@@ -38,6 +43,8 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [ENCAPSULATION] Detail query VIEW v_transaksi_detail tersembunyi
+        // Pemanggil cukup dapat DataTable tanpa tahu struktur query-nya
         public DataTable GetRiwayatTransaksi()
         {
             try
@@ -68,7 +75,11 @@ namespace ApotekSmart.Controllers
             }
         }
 
-        // FIX: bungkus dalam NpgsqlTransaction agar insert transaksi + resep atomic
+        // [COMPOSITION] BuatTransaksiResep menggunakan NpgsqlTransaction
+        // Transaction dibuat dan dimiliki sepenuhnya oleh method ini
+        // Jika method selesai/gagal, transaction ikut selesai/di-rollback
+        // [ENCAPSULATION] Detail atomicity (commit/rollback) tersembunyi dari pemanggil
+        // Pemanggil hanya tahu: berhasil = true, gagal = exception
         public bool BuatTransaksiResep(int idKasir, string nomorResep,
                                         string namaPasien, string namaDokter)
         {
@@ -81,6 +92,7 @@ namespace ApotekSmart.Controllers
             if (string.IsNullOrWhiteSpace(namaDokter))
                 throw new ArgumentException("Nama dokter tidak boleh kosong.");
 
+            // [COMPOSITION] conn dan tx dibuat di sini, hidup dan mati di dalam method ini
             using (var conn = _db.GetConnection())
             {
                 conn.Open();
@@ -89,6 +101,7 @@ namespace ApotekSmart.Controllers
                     try
                     {
                         // Step 1: insert transaksi
+                        // Jika step ini gagal → tx.Rollback() → resep tidak ikut tersimpan
                         string sqlTransaksi = @"INSERT INTO transaksi 
                             (id_kasir, jenis_transaksi, status, total)
                             VALUES (@idKasir, 'resep', 'menunggu', 0)
@@ -101,6 +114,7 @@ namespace ApotekSmart.Controllers
                         }
 
                         // Step 2: insert resep
+                        // Jika step ini gagal → tx.Rollback() → transaksi di step 1 ikut dibatalkan
                         string sqlResep = @"INSERT INTO resep 
                             (id_transaksi, nomor_resep, nama_pasien, nama_dokter, status_validasi)
                             VALUES (@idTr, @nomor, @pasien, @dokter, 'menunggu')";
@@ -113,11 +127,13 @@ namespace ApotekSmart.Controllers
                             cmd.ExecuteNonQuery();
                         }
 
+                        // Kedua step berhasil → commit
                         tx.Commit();
                         return true;
                     }
                     catch (Exception ex)
                     {
+                        // Salah satu step gagal → rollback semua
                         tx.Rollback();
                         throw new Exception("Gagal buat transaksi resep: " + ex.Message);
                     }
@@ -125,6 +141,8 @@ namespace ApotekSmart.Controllers
             }
         }
 
+        // [ENCAPSULATION] Detail query status resep tersembunyi
+        // Pemanggil cukup kirim nomor resep, dapat string status
         public string CekStatusResep(string nomorResep)
         {
             if (string.IsNullOrWhiteSpace(nomorResep))
