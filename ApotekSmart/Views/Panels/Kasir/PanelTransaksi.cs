@@ -15,12 +15,10 @@ namespace ApotekSmart.Views.Panels.Kasir
         private TransaksiController _transaksiController = new TransaksiController();
         private BaseUser _currentUser;
 
-        // FIX: Ganti DataTable _keranjang ke List<ItemTransaksi>
-        // Ini penerapan COMPOSITION — ItemTransaksi hidup dan mati bersama PanelTransaksi
+        // [COMPOSITION] semua objek ini hidup dan mati bersama PanelTransaksi
         private List<ItemTransaksi> _keranjang = new List<ItemTransaksi>();
-
-        // FIX: Tambah objek Pembayaran untuk kelola pembayaran
         private Pembayaran _pembayaran = new Pembayaran();
+        private TransaksiBiasa _transaksiAktif = null;
 
         public PanelTransaksi(BaseUser user)
         {
@@ -104,6 +102,7 @@ namespace ApotekSmart.Views.Panels.Kasir
             cmbJenis.SelectedIndexChanged += (s, e) =>
             {
                 pnlInfoResep.Visible = cmbJenis.SelectedItem?.ToString() == "resep";
+                UpdateTotal();
             };
 
             btnTambahItem.Click += BtnTambahItem_Click;
@@ -122,27 +121,23 @@ namespace ApotekSmart.Views.Panels.Kasir
                 int idObat = Convert.ToInt32(cmbObat.SelectedValue);
                 int qty = (int)numQty.Value;
 
-                // Ambil data obat dari DB
                 DataTable dt = _obatController.GetObatById(idObat);
                 if (dt.Rows.Count == 0) return;
 
-                // FIX: Map DataRow ke BaseObat (ObatBebas atau ObatResep)
-                // Ini penerapan POLYMORPHISM — MapRowToObat() kembalikan tipe yang tepat
+                // [POLYMORPHISM] MapRowToObat() kembalikan ObatBebas atau ObatResep
                 BaseObat obat = ObatController.MapRowToObat(dt.Rows[0]);
 
                 // Cek apakah obat sudah ada di keranjang
                 ItemTransaksi existing = _keranjang.Find(i => i.Obat.IdObat == idObat);
                 if (existing != null)
                 {
-                    // Update qty item yang sudah ada
                     existing.Qty += qty;
                 }
                 else
                 {
-                    // FIX: Buat ItemTransaksi baru — bukan DataRow
-                    // Ini penerapan CLASS MODEL yang benar
+                    // [AGGREGATION] ItemTransaksi menyimpan referensi BaseObat
                     var item = new ItemTransaksi();
-                    item.Obat = obat;         // AGGREGATION — obat tetap hidup
+                    item.Obat = obat;
                     item.Qty = qty;
                     item.HargaSatuan = obat.HargaJual;
                     _keranjang.Add(item);
@@ -158,11 +153,9 @@ namespace ApotekSmart.Views.Panels.Kasir
             }
         }
 
-        // ── Refresh tampilan DataGridView dari List<ItemTransaksi> ──
+        // ── Refresh tampilan DGV dari List<ItemTransaksi> ───
         private void RefreshDGV()
         {
-            // FIX: Build DataTable dari List<ItemTransaksi>
-            // untuk ditampilkan di DataGridView
             var dt = new DataTable();
             dt.Columns.Add("Nama Obat", typeof(string));
             dt.Columns.Add("Harga", typeof(decimal));
@@ -172,10 +165,10 @@ namespace ApotekSmart.Views.Panels.Kasir
             foreach (ItemTransaksi item in _keranjang)
             {
                 dt.Rows.Add(
-                    item.Obat.NamaObat,   // dari property BaseObat
+                    item.Obat.NamaObat,
                     item.HargaSatuan,
                     item.Qty,
-                    item.Subtotal         // read-only, dihitung otomatis
+                    item.Subtotal
                 );
             }
 
@@ -198,17 +191,33 @@ namespace ApotekSmart.Views.Panels.Kasir
             UpdateTotal();
         }
 
+        // ── Update total berdasarkan jenis transaksi ─────────
         private void UpdateTotal()
         {
-            // FIX: Pakai HitungTotal() dari BaseTransaksi pattern
-            // Total dihitung dari Subtotal tiap ItemTransaksi
-            decimal total = 0;
-            foreach (ItemTransaksi item in _keranjang)
-                total += item.Subtotal; // Subtotal read-only di ItemTransaksi
+            string jenis = cmbJenis.SelectedItem?.ToString();
 
-            // FIX: Simpan total ke objek Pembayaran
-            _pembayaran.Total = total;
-            lblNilaiTotal.Text = $"Rp {total:N0}";
+            if (jenis == "biasa")
+            {
+                // [POLYMORPHISM] TransaksiBiasa.HitungTotal() dari BaseTransaksi
+                _transaksiAktif = new TransaksiBiasa();
+                _transaksiAktif.IdKasir = _currentUser.IdUser;
+                _transaksiAktif.Items = _keranjang;
+                _transaksiAktif.HitungTotal();
+
+                _pembayaran.Total = _transaksiAktif.Total;
+                lblNilaiTotal.Text = $"Rp {_transaksiAktif.Total:N0}";
+            }
+            else
+            {
+                // [POLYMORPHISM] TransaksiResep.HitungTotal() dari BaseTransaksi
+                var transaksiResep = new TransaksiResep();
+                transaksiResep.Items = _keranjang;
+                transaksiResep.HitungTotal();
+
+                _pembayaran.Total = transaksiResep.Total;
+                lblNilaiTotal.Text = $"Rp {transaksiResep.Total:N0}";
+            }
+
             UpdateKembalian();
         }
 
@@ -216,8 +225,7 @@ namespace ApotekSmart.Views.Panels.Kasir
         {
             try
             {
-                // FIX: Pakai objek Pembayaran untuk hitung kembalian
-                // Kembalian adalah read-only property di Pembayaran
+                // [ENCAPSULATION] Kembalian dihitung otomatis oleh objek Pembayaran
                 _pembayaran.JumlahBayar = numJumlahBayar.Value;
 
                 lblNilaiKembalian.Text = $"Rp {_pembayaran.Kembalian:N0}";
@@ -227,7 +235,6 @@ namespace ApotekSmart.Views.Panels.Kasir
             }
             catch (InvalidOperationException)
             {
-                // Jumlah bayar kurang dari total
                 lblNilaiKembalian.Text = "Kurang!";
                 lblNilaiKembalian.ForeColor = Color.FromArgb(226, 75, 74);
             }
@@ -255,11 +262,11 @@ namespace ApotekSmart.Views.Panels.Kasir
                 { MessageBox.Show("Nama dokter tidak boleh kosong.", "Perhatian", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             }
 
-            // FIX: Validasi pembayaran lewat objek Pembayaran
+            // Validasi pembayaran lewat objek Pembayaran
             try
             {
                 _pembayaran.JumlahBayar = numJumlahBayar.Value;
-                decimal kembalian = _pembayaran.Kembalian; // throw jika kurang
+                decimal kembalian = _pembayaran.Kembalian;
             }
             catch (InvalidOperationException ex)
             {
@@ -270,39 +277,70 @@ namespace ApotekSmart.Views.Panels.Kasir
 
             try
             {
-                if (jenis == "resep")
+                if (jenis == "biasa")
                 {
-                    _transaksiController.BuatTransaksiResep(
-                        _currentUser.IdUser,
-                        txtNomorResep.Text.Trim(),
-                        txtNamaPasien.Text.Trim(),
-                        txtNamaDokter.Text.Trim());
+                    // [POLYMORPHISM] Buat objek TransaksiBiasa
+                    // ProsesTransaksi() → Status = "selesai"
+                    _transaksiAktif = new TransaksiBiasa();
+                    _transaksiAktif.IdKasir = _currentUser.IdUser;
+                    _transaksiAktif.Items = _keranjang;
+                    _transaksiAktif.HitungTotal();
+                    _transaksiAktif.ProsesTransaksi();
 
-                    MessageBox.Show("Transaksi resep berhasil dibuat!\nMenunggu validasi apoteker.",
-                        "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    // FIX: Build JSON dari List<ItemTransaksi>
+                    // Kirim ke DB lewat controller
                     var items = new List<object>();
                     foreach (ItemTransaksi item in _keranjang)
                         items.Add(new
                         {
-                            id_obat = item.Obat.IdObat,  // dari property BaseObat
+                            id_obat = item.Obat.IdObat,
                             qty = item.Qty
                         });
 
                     string itemsJson = JsonSerializer.Serialize(items);
-
                     _transaksiController.ProsesBayar(
                         _currentUser.IdUser, jenis,
                         itemsJson, _pembayaran.JumlahBayar);
+
+                    // [POLYMORPHISM] CetakStruk() milik TransaksiBiasa
+                    _transaksiAktif.CetakStruk();
 
                     MessageBox.Show(
                         $"Transaksi berhasil!\n" +
                         $"Total     : Rp {_pembayaran.Total:N0}\n" +
                         $"Bayar     : Rp {_pembayaran.JumlahBayar:N0}\n" +
                         $"Kembalian : Rp {_pembayaran.Kembalian:N0}",
+                        "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // [POLYMORPHISM] Buat objek TransaksiResep
+                    // ProsesTransaksi() → Status = "menunggu"
+                    var transaksiResep = new TransaksiResep();
+                    transaksiResep.IdKasir = _currentUser.IdUser;
+                    transaksiResep.NomorResep = txtNomorResep.Text.Trim();
+                    transaksiResep.NamaPasien = txtNamaPasien.Text.Trim();
+                    transaksiResep.NamaDokter = txtNamaDokter.Text.Trim();
+                    transaksiResep.Items = _keranjang;
+                    transaksiResep.HitungTotal();
+                    transaksiResep.ProsesTransaksi(); // Status → "menunggu"
+
+                    // Kirim ke DB lewat controller dengan total
+                    _transaksiController.BuatTransaksiResep(
+                        _currentUser.IdUser,
+                        transaksiResep.NomorResep,
+                        transaksiResep.NamaPasien,
+                        transaksiResep.NamaDokter,
+                        transaksiResep.Total); // ← kirim total
+
+                    // [POLYMORPHISM] CetakStruk() milik TransaksiResep
+                    transaksiResep.CetakStruk();
+
+                    MessageBox.Show(
+                        $"Transaksi resep berhasil dibuat!\n" +
+                        $"Nomor Resep : {transaksiResep.NomorResep}\n" +
+                        $"Pasien      : {transaksiResep.NamaPasien}\n" +
+                        $"Total       : Rp {transaksiResep.Total:N0}\n" +
+                        $"Status      : Menunggu validasi apoteker.",
                         "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
 
@@ -318,9 +356,9 @@ namespace ApotekSmart.Views.Panels.Kasir
         // ── Reset form setelah transaksi ─────────────────────
         private void ResetForm()
         {
-            // FIX: Reset List<ItemTransaksi> dan objek Pembayaran
             _keranjang.Clear();
-            _pembayaran = new Pembayaran(); // reset ke default
+            _transaksiAktif = null;
+            _pembayaran = new Pembayaran();
             dgvKeranjang.DataSource = null;
             numJumlahBayar.Value = 0;
             lblNilaiTotal.Text = "Rp 0";
